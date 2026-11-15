@@ -1,0 +1,14 @@
+SHIGAR & NAGAR — MINE TO MARKET
+
+Extract this ZIP and open index.html in Chrome, Edge, Firefox or Safari.
+The page is self-contained and works offline. No photos are included.
+Use the route buttons, numbered stops, zoom controls and price ledger.
+Download spreadsheet produces an Excel-compatible CSV from the embedded data.
+A separate copy of the CSV is also included.
+
+Final asking price: PKR 8,300
+Mine-gate price: PKR 1,000
+Mine-gate share: 12.05%
+Total increase: PKR 7,300 / 730%
+
+Prices and handoffs remain a project model, not verified transactions.

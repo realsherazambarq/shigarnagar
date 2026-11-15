@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mine-to-Market | Shigar & Nagar</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f6ed;color:#253329;font:15px system-ui,sans-serif}main,header>div{max-width:1260px;margin:auto;padding:0 24px}header{background:#23382d;color:#fcf8e8;padding:18px 0}header>div{display:flex;justify-content:space-between;gap:12px;align-items:center}header a{color:inherit}small,.eyebrow{letter-spacing:.15em;font-weight:800;font-size:11px}h1,h2{font-family:Georgia,serif}h1{font-size:clamp(36px,6vw,70px);letter-spacing:-.045em;margin:8px 0}h2{margin:0 0 8px}p{line-height:1.55}.hero{padding:32px 0 18px}.hero p{max-width:760px}.metrics,.notes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metrics div,aside,.notes article,details{border:1px solid #d5d8c9;background:#fffdf5;border-radius:9px;padding:14px}.metrics strong{display:block;font-size:23px}.layout{display:grid;grid-template-columns:245px minmax(0,1fr);gap:12px}.map{height:510px;position:relative;overflow:hidden;border:1px solid #b9c5b2;border-radius:9px;background:#e4e9d8;touch-action:none}.map canvas{width:100%;height:100%;display:block}.pin{position:absolute;transform:translate(-50%,-50%);height:25px;width:25px;padding:0;border-radius:100%;color:white;border:2px solid white;font-size:10px;cursor:pointer}.pin[aria-pressed=true]{outline:3px solid #253329;z-index:3}.zoom{position:absolute;right:9px;top:9px;display:grid;gap:4px}.zoom button{font-size:20px;width:35px}button,select,summary{cursor:pointer}button,select{font:inherit;border:1px solid #b9c5b2;border-radius:5px;background:#fffdf5;color:inherit;padding:5px}select{width:100%;margin:4px 0 10px}.routes button{display:block;text-align:left;width:100%;margin:5px 0;border-left:5px solid var(--route)}.routes button[aria-pressed=true]{background:#e2e9dc}.routes span{display:block;font-size:11px}.selected{border-top:1px solid #ddd;padding-top:9px}.caption,footer{font-size:12px;color:#526051}.notes{grid-template-columns:1fr 1fr;margin:15px 0}details{margin:15px 0}summary{font-weight:750}.scroll{overflow:auto;margin-top:10px}table{border-collapse:collapse;width:100%;font-size:13px}td,th{text-align:left;padding:8px;border-bottom:1px solid #ddd;vertical-align:top}td:nth-child(4),td:nth-child(5){white-space:nowrap}th{background:#e5eadc}footer{padding:8px 0 25px}@media(max-width:680px){main,header>div{padding:0 12px}.layout,.notes{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.routes{display:grid;grid-template-columns:1fr 1fr;gap:4px}.map{height:440px}}
+</style>
+<header><div><small>GILGIT-BALTISTAN FIELD ATLAS</small><a id="download" download="ShigarNagarGemPriceLedger.csv">Download spreadsheet ↓</a></div></header>
+<main><section class="hero"><div class="eyebrow">SHIGAR &amp; NAGAR · GEM SUPPLY CHAIN</div><h1>Mine to Market</h1><p>Follow a modeled gemstone from a <b>Rs 1,000 mine-gate price</b> through 23 shop-to-shop resales to a <b>Rs 8,300 final asking price</b>. Select a route section or stop to inspect the handoff and price change.</p>
+<div class="metrics"><div><strong>23</strong>Modeled resale shops</div><div><strong>6</strong>Linked route sections</div><div><strong>12.05%</strong>Mine-gate share of final price</div><div><strong>Rs 8,300</strong>Final modeled price</div></div></section>
+<div class="layout"><aside><button id="reset">Show all</button><h3>Route sections</h3><div id="routes" class="routes"></div><label for="stops">Inspect a stop</label><select id="stops"></select><div id="selected" class="selected" aria-live="polite"></div></aside>
+<section><div class="map" id="map" role="region" aria-label="Interactive schematic trade route map"><canvas></canvas><div id="pins"></div><div class="zoom"><button id="plus" aria-label="Zoom in">+</button><button id="minus" aria-label="Zoom out">−</button></div></div></section></div>
+<section class="notes"><article><h2>Where the price changes</h2><p>The price rises by Rs 7,300 overall (730% above the mine-gate price), with two modeled drops. The largest increase is Rs 1,000 at stop 23. Each change is the difference between consecutive quotes and may include costs as well as margin.</p></article><article><h2>How to verify the route</h2><p>Match the same stone across receipts using its weight, grade, photographs and transaction dates. Record actual payments separately from asking prices. The mine-gate share in this scenario is Rs 1,000 ÷ Rs 8,300 × 100 = 12.05%.</p></article></section>
+<details><summary>View the 23-stop price ledger</summary><div class="scroll"><table><thead><tr><th>Stop</th><th>Route</th><th>Representative location</th><th>Price</th><th>Change</th><th>Cumulative markup</th><th>Modeled handoff</th></tr></thead><tbody id="ledger"></tbody></table></div></details></main>
+<script>
+const sections=[['Shigar mine feeder','#40764d'],['Skardu retail circuit','#247880'],['Indus corridor','#446ca3'],['Gilgit and Nagar junction','#875e9b'],['Southbound trade corridor','#ae6d32'],['Lahore retail circuit','#a64d48']];
+const rows=[
+['Shigar town',1100,83,16,'Local shop buys the rough stone at the mine gate and quotes it for resale.'],
+['Shigar town',1250,80,20,'A second shop cleans and sorts the stone before quoting it.'],
+['Shigar road',1400,77,24,'Roadside reseller adds collection and handling.'],
+['Skardu approach',1550,74,28,'A dealer receives the stone with a mixed parcel and lists it individually.'],
+['Skardu bazaar',1750,77,33,'A shop grades the stone by visible colour and clarity.'],
+['Skardu bazaar',2000,73,37,'A second retailer quotes the stone after inspecting it under lighting.'],
+['Skardu bazaar',1900,69,33,'A resale quote drops after a visible inclusion is identified.'],
+['Skardu bazaar',2250,66,29,'A specialist shop offers it to buyers looking for rough material.'],
+['Skardu–Gilgit road',2450,61,27,'A corridor reseller adds packing and onward handling.'],
+['Rondu area',2650,56,29,'A shop takes the stone into its rough gemstone inventory.'],
+['Jaglot area',2900,50,32,'A junction retailer prices in the cost of holding stock.'],
+['Gilgit approach',3200,46,27,'A retailer receives the stone on a combined delivery.'],
+['Gilgit bazaar',3500,42,22,'A gemstone shop regrades the stone and updates its quote.'],
+['Gilgit bazaar',3800,38,18,'A retailer displays the stone alongside comparable rough pieces.'],
+['Gilgit bazaar',3700,34,22,'A shop offers a lower quote to move the stone quickly.'],
+['Gilgit bazaar',4250,35,29,'A reseller offers the stone individually after checking its weight.'],
+['Chilas area',4700,32,40,'A southbound retailer includes transport and handling in its quote.'],
+['Besham area',5100,37,51,'A corridor shop buys a small lot and prices the stone separately.'],
+['Mansehra area',5600,43,61,'A dealer quotes the rough stone to customers seeking a cuttable piece.'],
+['Rawalpindi',6200,50,71,'An urban retailer checks weight and puts the stone on display.'],
+['Lahore wholesale district',6750,59,77,'A shop buys from the Rawalpindi reseller and quotes to local dealers.'],
+['Lahore gem market',7300,67,83,'A specialist shop prices the stone for gemstone buyers.'],
+['Lahore final retailer',8300,75,89,'The final retailer lists the rough stone at Rs 8,300.']
+];
+const ends=[4,8,12,16,20,23], mine=[88,10], map=document.querySelector('#map'), canvas=map.querySelector('canvas'), ctx=canvas.getContext('2d');
+const by=id=>document.getElementById(id), money=n=>'Rs '+n.toLocaleString('en-PK'), change=i=>rows[i][1]-(rows[i-1]?.[1]??1000), group=i=>ends.findIndex(n=>i<n), signed=n=>(n>=0?'+':'−')+money(Math.abs(n));
+let active=-1, filter=-1, scale=1, dx=0,dy=0,drag;
+const coords=(x,y)=>[map.clientWidth*(.5+(x/100-.5)*scale)+dx,map.clientHeight*(.5+(y/100-.5)*scale)+dy];
+by('routes').innerHTML=sections.map(([name,color],i)=>'<button style="--route:'+color+'">'+name+'<span>R'+(i+1)+' · Stops '+((ends[i-1]??0)+1)+'–'+ends[i]+'</span></button>').join('');
+by('stops').innerHTML='<option value="-1">Select a location…</option>'+rows.map(([name],i)=>'<option value="'+i+'">'+(i+1)+' · '+name+'</option>').join('');
+by('pins').innerHTML=rows.map(([name],i)=>'<button class="pin" style="background:'+sections[group(i)][1]+'" aria-label="Stop '+(i+1)+' · '+name+'">'+(i+1)+'</button>').join('');
+const pins=[...by('pins').children], routes=[...by('routes').children];
+const csv=[['Stop','Route','Location','Price PKR','Change PKR','Cumulative markup %','Modeled handoff'],[0,'Origin','Shigar mine gate',1000,0,0,'Starting mine-gate price'],...rows.map(([name,price,,,note],i)=>[i+1,sections[group(i)][0],name,price,change(i),Number(((price/1000-1)*100).toFixed(2)),note])];
+by('download').href=URL.createObjectURL(new Blob(['\ufeff'+csv.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
+by('ledger').innerHTML=rows.map(([name,price,,,note],i)=>'<tr>'+[i+1,sections[group(i)][0],name,money(price),signed(change(i)),((price/1000-1)*100).toFixed(1)+'%',note].map(v=>'<td>'+v+'</td>').join('')+'</tr>').join('');
+function render(){
+ const w=map.clientWidth,h=map.clientHeight,d=devicePixelRatio||1;
+ canvas.width=w*d;canvas.height=h*d;ctx.scale(d,d);
+ function line(points,color,width){ctx.beginPath();points.forEach(([x,y],i)=>ctx[i?'lineTo':'moveTo'](...coords(x,y)));ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
+ for(let n=0;n<15;n++){const p=[];for(let x=0;x<=100;x+=2)p.push([x,n*7+Math.sin(x/11+n)*3+Math.sin(x/5+n)*1.5]);line(p,'#cbd7be',1)}
+ line([[98,12],[82,24],[72,30],[62,30],[51,33],[39,38],[34,48],[38,58],[33,69],[30,86],[36,100]],'#a6bfbd',3);
+ ctx.font='600 11px system-ui';ctx.fillStyle='#48604e';[['NAGAR · MINING AREA',25,12],['SHIGAR MINE GATE',67,7],['SKARDU',80,40],['GILGIT',20,27],['INDUS RIVER',11,62],['PUNJAB',53,92],['LAHORE',79,95],['↑ N',5,8]].forEach(([t,x,y])=>ctx.fillText(t,...coords(x,y)));
+ rows.forEach((r,i)=>{const prev=rows[i-1];line([prev?[prev[2],prev[3]]:mine,[r[2],r[3]]],filter<0||filter===group(i)?sections[group(i)][1]:'#abb9a7',3)});
+ const [mx,my]=coords(...mine);ctx.fillStyle='#253329';ctx.fillRect(mx-4,my-4,8,8);
+ pins.forEach((pin,i)=>{const [x,y]=coords(rows[i][2],rows[i][3]);pin.style.left=x+'px';pin.style.top=y+'px';pin.style.opacity=filter<0||group(i)===filter||active===i?1:.30;pin.setAttribute('aria-pressed',active===i)});
+ routes.forEach((b,i)=>b.setAttribute('aria-pressed',filter===i));by('stops').value=active;
+ const r=rows[active];by('selected').innerHTML=r?'<strong>'+((active+1)+' · '+r[0])+'</strong><p>'+money(r[1])+' <b>('+signed(change(active))+')</b></p><p>'+r[4]+'</p><p>Cumulative markup: '+((r[1]/1000-1)*100).toFixed(1)+'%</p>':'<strong>Shigar mine gate · '+money(1000)+'</strong><p>Select a numbered shop to see its price and handoff.</p>';
+}
+pins.forEach((p,i)=>p.onclick=()=>{active=i;render()});routes.forEach((p,i)=>p.onclick=()=>{filter=filter===i?-1:i;active=-1;render()});
+by('stops').onchange=e=>{active=Number(e.target.value);if(active>=0&&filter>=0)filter=group(active);scale=1;dx=dy=0;render()};
+by('reset').onclick=()=>{active=filter=-1;scale=1;dx=dy=0;render()};
+by('plus').onclick=()=>{scale=Math.min(4,scale*1.3);render()};by('minus').onclick=()=>{scale=Math.max(1,scale/1.3);if(scale===1)dx=dy=0;render()};
+canvas.onpointerdown=e=>{drag=[e.clientX-dx,e.clientY-dy];canvas.setPointerCapture(e.pointerId)};canvas.onpointermove=e=>{if(drag){dx=e.clientX-drag[0];dy=e.clientY-drag[1];render()}};canvas.onpointerup=canvas.onpointercancel=()=>{drag=null};
+new ResizeObserver(render).observe(map);render();
+</script></html>
